@@ -61,19 +61,19 @@ TAREFAS_INICIAIS = [
 ]
 
 
-def inserir_tarefas_iniciais(cur):
-    """Insere as tarefas iniciais do checklist."""
+def inserir_tarefas_iniciais(cur, usuario_id):
+    """Insere as tarefas iniciais do checklist para um usuário."""
     for titulo, categoria in TAREFAS_INICIAIS:
         cur.execute(
-            "INSERT INTO tarefas (titulo, categoria) VALUES (%s, %s)",
-            (titulo, categoria),
+            "INSERT INTO tarefas (titulo, categoria, usuario_id) VALUES (%s, %s, %s)",
+            (titulo, categoria, usuario_id),
         )
 
 
-def inserir_lista_inicial(cur):
-    """Insere todos os itens da lista inicial como 'Pendente'."""
+def inserir_lista_inicial(cur, usuario_id):
+    """Insere todos os itens da lista inicial como 'Pendente' para um usuário."""
     for nome, categoria, quantidade in LISTA_INICIAL:
         cur.execute(
-            "INSERT INTO produtos (nome, categoria, quantidade) VALUES (%s, %s, %s)",
-            (nome, categoria, quantidade),
+            "INSERT INTO produtos (nome, categoria, quantidade, usuario_id) VALUES (%s, %s, %s, %s)",
+            (nome, categoria, quantidade, usuario_id),
         )

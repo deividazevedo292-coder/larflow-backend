@@ -1,14 +1,15 @@
 """
-Cria as tabelas no banco e, se estiverem vazias, coloca a lista inicial
-de produtos e as tarefas iniciais do checklist.
+Cria (ou atualiza) as tabelas no banco.
 
 Rode antes de iniciar a API (pode rodar de novo sem problema):
     python init_db.py
+
+A lista inicial de produtos e as tarefas do checklist agora são
+criadas para cada pessoa no momento do cadastro (rota /api/cadastro).
 """
 from pathlib import Path
 
 from db import transacao
-from lista_inicial import inserir_lista_inicial, inserir_tarefas_iniciais
 
 
 def main():
@@ -17,15 +18,15 @@ def main():
     with transacao() as cur:
         cur.execute(schema)
 
-        cur.execute("SELECT COUNT(*) AS total FROM produtos")
-        if cur.fetchone()["total"] == 0:
-            inserir_lista_inicial(cur)
-            print("Lista inicial cadastrada.")
-
-        cur.execute("SELECT COUNT(*) AS total FROM tarefas")
-        if cur.fetchone()["total"] == 0:
-            inserir_tarefas_iniciais(cur)
-            print("Tarefas do checklist cadastradas.")
+        # Dados de antes do login não têm dono e não aparecem para ninguém
+        cur.execute(
+            """SELECT (SELECT COUNT(*) FROM produtos WHERE usuario_id IS NULL)
+                    + (SELECT COUNT(*) FROM tarefas  WHERE usuario_id IS NULL) AS total"""
+        )
+        sem_dono = cur.fetchone()["total"]
+        if sem_dono:
+            print(f"Aviso: {sem_dono} registro(s) de antes do login ficaram sem dono "
+                  "e não aparecem para nenhum usuário.")
 
     print("Banco pronto!")
 
